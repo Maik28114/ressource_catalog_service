@@ -15,7 +15,7 @@ const port = 5002;
 const __filename = fileURLToPath(import.meta.url);
 
 // Pfad zur vollständigen Datei wo die Daten liegen
-const __dirname = path.dirname();
+const __dirname = path.dirname(__filename);
 
 // Variable(constanten gemeint) wo wir die Datei mit den Daten speichern
 const data_file = path.join(__dirname, 'data', 'resources.json');
@@ -36,6 +36,25 @@ app.get('/resources', (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Interner Serverfehler beim Laden der Daten'});
     }
+});
+// doppelpunkt id verweist auf url id
+app.get('/resources/:id', (req, res) => {
+    try {
+        const resourceId = req.params.id;
+        const data = readFileSync(data_file, 'utf8');
+        const resources = JSON.parse(data);
+        const resource = resources.find(r => r.id === resourceId);
+
+        if (resource) {
+            res.json(resource);
+        } else {
+            res.status(404).json({ error: `Ressource mit ID ${resourceId} nicht gefunden.` })
+        }
+
+    } catch (error) {
+        res.status(500).json({ error: 'Interner Serverfehler beim Laden der Daten'});
+    }
+
 });
 
 // Startet den Server und lässt ihn auf dem angegebenen Port lauschen
