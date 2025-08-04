@@ -29,9 +29,13 @@ app.get('/', (req, res) => {
 // Definiert die Route "/resources"
 // Wenn ein GET-Request an "/resources" geschickt wird, sendet der Server momentan einen Platzhaltertext zurück
 app.get('/resources', (req, res) => {
-    const data = readFileSync(data_file, 'utf8');
-    const resources = JSON.parse(data);
-    res.json(resources);
+    try {
+        const data = readFileSync(data_file, 'utf8');
+        const resources = JSON.parse(data);
+        res.json(resources);
+    } catch (error) {
+        res.status(500).json({ error: 'Interner Serverfehler beim Laden der Daten'});
+    }
 });
 
 // Startet den Server und lässt ihn auf dem angegebenen Port lauschen
