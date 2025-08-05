@@ -8,6 +8,7 @@ const port = 5002;
 const app = express(); 
 // um Middelware als Anwendung einzufügen
 app.use(express.json());
+// Routes hinzufügen
 app.use('/resources', resourcesRouter);
 // Startet den Server und lässt ihn auf dem angegebenen Port lauschen
 // Sobald der Server läuft, wird eine Nachricht in der Konsole ausgegeben

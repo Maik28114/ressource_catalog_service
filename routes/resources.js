@@ -1,8 +1,9 @@
 // Importiert das express-Modul, das helfen wird, einen Web-Server zu erstellen
 import express from 'express';
-import {readFileSync} from 'fs'; 
+import {readFileSync, writeFileSync} from 'fs'; 
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';  // neue id generiert
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get('/', (req, res) => {
         const resources = JSON.parse(data);
         res.json(resources);
     } catch (error) {
-        res.status(500).json({ error: 'Interner Serverfehler beim Laden der Ressourcen-Daten'});
+        res.status(500).json({ error: 'Interner Serverfehler beim Laden der Ressourcen-Daten.'});
     }
 });
 // doppelpunkt id verweist auf url id
@@ -40,8 +41,40 @@ router.get('/:id', (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).json({ error: 'Interner Serverfehler beim Laden der Ressourcen-Daten'});
+        res.status(500).json({ error: 'Interner Serverfehler beim Laden der Ressourcen-Daten.'});
     }
+});
+
+
+router.post('/', (req, res) => {
+    const newData = req.body;
+
+    if (!newData.title || !newData.type) {
+        res.status(400).json({error: 'title und type sind erforderlich.'});
+        return; 
+    }
+
+    // 1. Neues Resource Objekt
+    const newReource = {
+        id: uuidv4(),
+        ...newData
+    }
+    
+    try {
+        // 2. Vorhandene Daten aus der Datei lesen und in einem Array speichern.
+        const data = readFileSync(data_file, 'utf8');
+        const resources = JSON.parse(data);
+        // 3. Das Neue Objekt in das Array hinzufuegen.
+        resources.push(newReource);
+        // 4. Das Neue Array in die Datei schreiben.
+        writeFileSync(data_file, JSON.stringify(resources, null, 2), 'utf8');
+        // 5. Antwort schicken
+        res.status(201).json(newReource);
+    } catch (error) {
+        res.status(500).json({ error: 'Interner Serverfehler bei der Verarbeitung der Ressourcen-Daten.'});
+    }
+
+
 });
 
 // Gesamte Module wird exportiert
