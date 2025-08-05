@@ -6,7 +6,9 @@ import { fileURLToPath } from 'url';
 
 
 // Erstellt eine neue Express-Anwendung
-const app = express();
+const app = express(); 
+// um Middelware als Anwendung einzufügen
+app.use(express.json());
 
 // Legt den Port fest, auf dem der Server später laufen soll
 const port = 5002;
