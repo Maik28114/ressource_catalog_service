@@ -5,8 +5,8 @@ const validateResource = (req, res, next) => {
         return res.status(400).json({ error: 'Titel und Typ der Ressource sind erforderlich.' });
     }
 
-    // next();
-};
+    next();
+}
 
 export {validateResource};
 
