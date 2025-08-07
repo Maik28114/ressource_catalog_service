@@ -1,6 +1,6 @@
 import express from 'express';
 import resourcesRouter from './routes/resources.js';
-import { errorHandler } from './middleware/error-handler.js';
+import { errorHandler } from './middleware/error-handler.js'; // Ticket RC008
 
 const port = 5002;
 
