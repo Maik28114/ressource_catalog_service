@@ -19,6 +19,6 @@ app.use('/resources', resourcesRouter);
 app.use(errorHandler);
 
 
-app.listen(Port, () => {
-    console.log(`Server is running at http://localhost:${Port}`);
+app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
 });
