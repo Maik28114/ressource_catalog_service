@@ -144,7 +144,7 @@ router.put('/:resourceId/feedback/:feedbackId', (req, res, next) => {
         const data = fs.readFileSync(FEEDBACK_FILE, 'utf-8');
         let feedback = JSON.parse(data);
 
-        // Feedback suchen (by id & resourceId!)
+        // Feedback suchen 
         const feedbackIndex = feedback.findIndex(f => f.id === feedbackId && f.resourceId === resourceId);
 
         if (feedbackIndex === -1) {
@@ -164,7 +164,7 @@ router.put('/:resourceId/feedback/:feedbackId', (req, res, next) => {
         const newFeedbackData = JSON.stringify(feedback, null, 2);
         fs.writeFileSync(FEEDBACK_FILE, newFeedbackData, 'utf-8');
 
-        // Erfolgsantwort
+        
         res.status(200).json(feedback[feedbackIndex]);
     } catch (error) {
         console.error('Fehler beim Aktualisieren des Feedbacks:', error);
@@ -172,6 +172,43 @@ router.put('/:resourceId/feedback/:feedbackId', (req, res, next) => {
     }
 });
 
+
+// Ticket RC-018: Text-Feedback löschen
+router.delete('/:resourceId/feedback/:feedbackId', (req, res, next) => {
+    // Schritt 2: IDs auslesen
+    const resourceId = req.params.resourceId;
+    const feedbackId = req.params.feedbackId;
+
+    // Schritt 3: Löschen
+    try {
+        const data = fs.readFileSync(FEEDBACK_FILE, 'utf-8');
+        let feedback = JSON.parse(data);
+
+        const initialLength = feedback.length;
+
+        // Feedback filtern, das gelöscht werden soll
+        feedback = feedback.filter(
+            f => !(f.id === feedbackId && f.resourceId === resourceId)
+        );
+
+        // Falls nichts gelöscht wurde (Feedback nicht gefunden)
+        if (feedback.length === initialLength) {
+            return res
+                .status(404)
+                .json({ error: `Feedback mit ID ${feedbackId} für Ressource ${resourceId} nicht gefunden.` });
+        }
+
+        // Schreibe die aktualisierte Liste zurück
+        const newFeedbackData = JSON.stringify(feedback, null, 2);
+        fs.writeFileSync(FEEDBACK_FILE, newFeedbackData, 'utf-8');
+
+        
+        res.status(204).end();
+    } catch (error) {
+        console.error('Fehler beim Löschen des Feedbacks:', error);
+        next(error);
+    }
+});
 
 
 
