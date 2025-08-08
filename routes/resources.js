@@ -65,8 +65,6 @@ router.get('/:id', (req, res, next) => {
 
 
 
-
-
 router.post('/', validateResource, (req, res) => {
         const newResourceData = req.body;
         const newResource = {
@@ -91,7 +89,7 @@ router.post('/', validateResource, (req, res) => {
 
 });
 
-
+// Ticket RC-016: Text-Feedback zu einer Ressource hinzufügen
 router.post('/:resourceId/feedback', (req, res, next) => {
     const resourceId = req.params.resourceId;
     const { feedbackText, userId } = req.body;
@@ -123,6 +121,53 @@ router.post('/:resourceId/feedback', (req, res, next) => {
         res.status(201).json(newFeedback);
     } catch (error) {
         console.error('Fehler beim Schreiben des Feedbacks in die Datei:', error);
+        next(error);
+    }
+});
+
+// Ticket RC-017: Text-Feedback ändern
+router.put('/:resourceId/feedback/:feedbackId', (req, res, next) => {
+    // Schritt 2: IDs & neuen Text holen
+    const resourceId = req.params.resourceId;
+    const feedbackId = req.params.feedbackId;
+    const { feedbackText } = req.body;
+
+    // Schritt 3: Validierung
+    if (!feedbackText || feedbackText.trim().length < 10 || feedbackText.trim().length > 500) {
+        return res
+            .status(400)
+            .json({ error: 'Aktualisierter Feedback-Text muss zwischen 10 und 500 Zeichen lang sein.' });
+    }
+
+    // Schritt 4: Feedback suchen & ändern
+    try {
+        const data = fs.readFileSync(FEEDBACK_FILE, 'utf-8');
+        let feedback = JSON.parse(data);
+
+        // Feedback suchen (by id & resourceId!)
+        const feedbackIndex = feedback.findIndex(f => f.id === feedbackId && f.resourceId === resourceId);
+
+        if (feedbackIndex === -1) {
+            return res
+                .status(404)
+                .json({ error: `Feedback mit ID ${feedbackId} für Ressource ${resourceId} nicht gefunden.` });
+        }
+
+        // Feedback aktualisieren
+        feedback[feedbackIndex] = {
+            ...feedback[feedbackIndex],
+            feedbackText: feedbackText.trim(),
+            timestamp: new Date().toISOString()
+        };
+
+        // Datei aktualisieren
+        const newFeedbackData = JSON.stringify(feedback, null, 2);
+        fs.writeFileSync(FEEDBACK_FILE, newFeedbackData, 'utf-8');
+
+        // Erfolgsantwort
+        res.status(200).json(feedback[feedbackIndex]);
+    } catch (error) {
+        console.error('Fehler beim Aktualisieren des Feedbacks:', error);
         next(error);
     }
 });
